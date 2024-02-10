@@ -56,7 +56,7 @@ SELECT *,
 FORMAT_DATE('%b-%d-%Y',DATE(Date)) AS Date_, FORMAT_TIME('%T',TIME(Date)) AS Time
 FROM `sigma-cairn-402317.Wellness.weightLogInfo`
 
-4. Summarize how many users based from whom each data set was collected:
+--4. Summarize how many users based from whom each data set was collected:
 SELECT COUNT(DISTINCT Id) AS Total_Users
 FROM `sigma-cairn-402317.Wellness.dailyActivity_new`
 UNION ALL
