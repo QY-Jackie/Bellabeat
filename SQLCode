@@ -1,0 +1,79 @@
+--Upload the chosen data file to BigQuery of Google Cloud.
+
+--Clean data:
+
+--1. Daily activity
+--a) check for duplicate data
+
+Select Id, ActivityDate, TotalSteps, Count(*)
+From`sigma-cairn-402317.Wellness.dailyActivity`
+Group by Id, ActivityDate, TotalSteps
+Having Count(*)>1
+
+--b) Add a column showing day of week based on the ActivityDate column, and add a new date column having the date format changed:
+
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.dailyActivity_new` 
+AS
+SELECT *, FORMAT_DATE('%A', ActivityDate) AS DayofWeek,FORMAT_DATE('%b-%d-%Y', ActivityDate) AS Date
+FROM `sigma-cairn-402317.Wellness.dailyActivity1`
+
+--2. Heart rate
+--Split the data and time into two columns and change the format:
+
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.heart_rate_`   
+AS    
+SELECT Id,Time,Value,     
+FORMAT_DATE('%b-%d-%Y',DATE(Time)) AS Date, FORMAT_TIME('%T',TIME(Time)) AS Time_  
+FROM `sigma-cairn-402317.Wellness.heartrate`
+
+--3. Similar method applied to the rest files to have to the split date and time columns and consistent format:
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.hourlyCalories_new`   
+AS    
+SELECT *,     
+FORMAT_DATE('%b-%d-%Y',DATE(ActivityHour)) AS Date, FORMAT_TIME('%T',TIME(ActivityHour)) AS Time
+FROM `sigma-cairn-402317.Wellness.hourlyCalories`
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.hourlyIntensities_new`   
+AS    
+SELECT *,     
+FORMAT_DATE('%b-%d-%Y',DATE(ActivityHour)) AS Date, FORMAT_TIME('%T',TIME(ActivityHour)) AS Time
+FROM `sigma-cairn-402317.Wellness.hourlyIntensities`
+
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.hourlySteps_new`   
+AS    
+SELECT *,     
+FORMAT_DATE('%b-%d-%Y',DATE(ActivityHour)) AS Date, FORMAT_TIME('%T',TIME(ActivityHour)) AS Time
+FROM `sigma-cairn-402317.Wellness.hourlySteps`
+
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.sleepDay_new`   
+AS    
+SELECT *,     
+FORMAT_DATE('%b-%d-%Y',DATE(SleepDay)) AS Date, FORMAT_TIME('%T',TIME(SleepDay)) AS Time
+FROM `sigma-cairn-402317.Wellness.sleepDay`
+
+CREATE TABLE IF NOT EXISTS `sigma-cairn-402317.Wellness.weightLogInfo_new`   
+AS    
+SELECT *,     
+FORMAT_DATE('%b-%d-%Y',DATE(Date)) AS Date_, FORMAT_TIME('%T',TIME(Date)) AS Time
+FROM `sigma-cairn-402317.Wellness.weightLogInfo`
+
+4. Summarize how many users based from whom each data set was collected:
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.dailyActivity_new`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.heart_rate_`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.hourlyCalories_new`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.hourlyIntensities_new`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.hourlySteps_new`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.sleepDay_new`
+UNION ALL
+SELECT COUNT(DISTINCT Id) AS Total_Users
+FROM `sigma-cairn-402317.Wellness.weightLogInfo_new`
